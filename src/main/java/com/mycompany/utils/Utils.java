@@ -1,11 +1,10 @@
 package com.mycompany.utils;
 
+import org.jxmapviewer.viewer.GeoPosition;
+
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
 
 public class Utils {
 
@@ -55,5 +54,18 @@ public class Utils {
         long horas = d.toHours();
         long minutos = d.toMinutes() - (horas * 60);
         return String.format("%d:%02d", horas, minutos);
+    }
+
+    /**
+     * Crea un GeoPosition a partir de una latitud y longitud de GoogleMaps
+     *
+     * @param latitudLongitud  coordenadas de latitud y longitud como aparecen en google maps (Ejemplo: -42.766575, -65.033028)
+     * @return GeoPosition
+     */
+    public static GeoPosition convertirCoordenadasGM(String latitudLongitud) {
+        String[] coordenadas = latitudLongitud.split(",");
+        double latitud = Double.parseDouble(coordenadas[0].trim());
+        double longitud = Double.parseDouble(coordenadas[1].trim());
+        return new GeoPosition(latitud, longitud);
     }
 }
