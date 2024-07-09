@@ -13,6 +13,8 @@ import org.jxmapviewer.viewer.WaypointPainter;
 
 import javax.swing.*;
 import javax.swing.event.MouseInputListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -59,6 +61,16 @@ public class InteractiveMap {
         mapViewer.addMouseListener(mia);
         mapViewer.addMouseMotionListener(mia);
         mapViewer.addMouseWheelListener(new ZoomMouseWheelListenerCursor(mapViewer));
+
+        // Agregar listener para obtener coordenadas al hacer clic
+        mapViewer.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                GeoPosition geoPosition = mapViewer.convertPointToGeoPosition(e.getPoint());
+                System.out.println("Coordenadas: " + geoPosition);
+            }
+        });
+
 
         // Crear y devolver el JScrollPane con el mapViewer
         return new JScrollPane(mapViewer);

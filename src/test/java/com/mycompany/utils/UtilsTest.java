@@ -9,8 +9,8 @@ class UtilsTest {
 
     @org.junit.jupiter.api.Test
     void validarPatente() {
-        assertTrue(Utils.validarPatente("22ABC22"));
-        assertFalse(Utils.validarPatente("00=BC00"));
+        assertFalse(Utils.validarPatente("22ABC22"));
+        assertTrue(Utils.validarPatente("00=BC00"));
     }
 
     @org.junit.jupiter.api.Test

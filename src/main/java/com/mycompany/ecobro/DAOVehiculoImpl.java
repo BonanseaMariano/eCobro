@@ -3,12 +3,15 @@ package com.mycompany.ecobro;
 import com.mycompany.database.Database;
 import com.mycompany.interfaces.DAOVehiculo;
 import com.mycompany.models.Vehiculo;
+import org.jxmapviewer.viewer.GeoPosition;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class DAOVehiculoImpl extends Database implements DAOVehiculo {
 
@@ -117,30 +120,25 @@ public class DAOVehiculoImpl extends Database implements DAOVehiculo {
     }
 
     /**
-     * Obtiene todos los vehiculos de una calle la base de datos
+     * Crea un mapa de patentes y sus Geopositions
      *
-     * @param calle calle a buscar
-     * @return lista de vehiculos en la calle especificada
+     * @return un hasmap de patentes y sus geopositions
      * @throws Exception
      */
     @Override
-    public List<Vehiculo> listar(String calle) throws Exception {
-        List<Vehiculo> lista = null;
+    public Map<String, GeoPosition> mapaUbicaciones() throws Exception {
+        Map<String, GeoPosition> map = new HashMap<>();
         try {
             this.conectar();
-            String query = calle.isEmpty() ? "SELECT * FROM vehiculo" : "SELECT * FROM vehiculo WHERE calle LIKE '%" + calle + "%';";
+            String query = "SELECT patente, uLat, uLon FROM vehiculo";
             PreparedStatement st = this.conexion.prepareStatement(query);
-
-            lista = new ArrayList<>();
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
-                Vehiculo vehiculo = new Vehiculo();
-                vehiculo.setPatente(rs.getString("patente"));
-                vehiculo.setHoraEntrada(rs.getTimestamp("horaEntrada"));
-                vehiculo.setCalle(rs.getString("calle"));
-                vehiculo.setuLat(rs.getDouble("uLat"));
-                vehiculo.setuLon(rs.getDouble("uLon"));
-                lista.add(vehiculo);
+                String patente = rs.getString("patente");
+                Double uLat = rs.getDouble("uLat");
+                Double uLon = rs.getDouble("uLon");
+                GeoPosition geoPosition = new GeoPosition(uLat, uLon);
+                map.put(patente, geoPosition);
             }
             rs.close();
             st.close();
@@ -149,6 +147,6 @@ public class DAOVehiculoImpl extends Database implements DAOVehiculo {
         } finally {
             this.cerrar();
         }
-        return lista;
+        return map;
     }
 }

@@ -1,8 +1,10 @@
 package com.mycompany.interfaces;
 
 import com.mycompany.models.Vehiculo;
+import org.jxmapviewer.viewer.GeoPosition;
 
 import java.util.List;
+import java.util.Map;
 
 public interface DAOVehiculo {
 
@@ -14,5 +16,5 @@ public interface DAOVehiculo {
 
     public Vehiculo getVPatente(String patente) throws Exception;
 
-    public List<Vehiculo> listar(String calle) throws Exception;
+    public Map<String, GeoPosition> mapaUbicaciones() throws Exception;
 }

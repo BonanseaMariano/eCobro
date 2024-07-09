@@ -21,8 +21,8 @@ public class Utils {
 
         char[] caracteres = patente.toCharArray();
 
-        if (!Character.isDigit(caracteres[0]) || !Character.isDigit(caracteres[1]) || !Character.isLetter(caracteres[2]) || !Character.isLetter(caracteres[3]) ||
-                !Character.isLetter(caracteres[4]) || !Character.isDigit(caracteres[5]) || !Character.isDigit(caracteres[6])) {
+        if (!Character.isLetter(caracteres[0]) || !Character.isLetter(caracteres[1]) || !Character.isDigit(caracteres[2]) || !Character.isDigit(caracteres[3]) ||
+                !Character.isDigit(caracteres[4]) || !Character.isLetter(caracteres[5]) || !Character.isLetter(caracteres[6])) {
             return false;
         }
         return true;
