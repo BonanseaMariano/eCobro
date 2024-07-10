@@ -7,6 +7,7 @@ import org.jxmapviewer.viewer.GeoPosition;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -43,19 +44,21 @@ public class DAOVehiculoImpl extends Database implements DAOVehiculo {
     /**
      * Modifica un vehiculo en la base de datos
      *
-     * @param vehiculo vehiculo a modificar
+     * @param vehiculo     vehiculo a modificar
+     * @param patenteNueva nueva patente
      * @throws Exception
      */
     @Override
-    public void modificar(Vehiculo vehiculo) throws Exception {
+    public void modificar(Vehiculo vehiculo, String patenteNueva) throws Exception {
         try {
             this.conectar();
-            PreparedStatement st = this.conexion.prepareStatement("UPDATE vehiculo SET horaEntrada = ?, calle = ?, uLat = ?, uLon = ? WHERE patente = ?");
-            st.setTimestamp(1, new Timestamp(vehiculo.getHoraEntrada().getTime()));
-            st.setString(2, vehiculo.getCalle());
-            st.setDouble(3, vehiculo.getuLat());
-            st.setDouble(4, vehiculo.getuLon());
-            st.setString(5, vehiculo.getPatente());
+            PreparedStatement st = this.conexion.prepareStatement("UPDATE vehiculo SET patente = ?, horaEntrada = ?, calle = ?, uLat = ?, uLon = ? WHERE patente = ?");
+            st.setString(1, patenteNueva);
+            st.setTimestamp(2, new Timestamp(vehiculo.getHoraEntrada().getTime()));
+            st.setString(3, vehiculo.getCalle());
+            st.setDouble(4, vehiculo.getuLat());
+            st.setDouble(5, vehiculo.getuLon());
+            st.setString(6, vehiculo.getPatente());
             st.executeUpdate();
             st.close();
         } catch (Exception e) {
@@ -126,19 +129,21 @@ public class DAOVehiculoImpl extends Database implements DAOVehiculo {
      * @throws Exception
      */
     @Override
-    public Map<String, GeoPosition> mapaUbicaciones() throws Exception {
-        Map<String, GeoPosition> map = new HashMap<>();
+    public Map<String, Vehiculo> mapaVehiculos() throws Exception {
+        Map<String, Vehiculo> map = new HashMap<>();
         try {
             this.conectar();
-            String query = "SELECT patente, uLat, uLon FROM vehiculo";
+            String query = "SELECT patente, horaEntrada, uLat, uLon, calle FROM vehiculo";
             PreparedStatement st = this.conexion.prepareStatement(query);
             ResultSet rs = st.executeQuery();
             while (rs.next()) {
-                String patente = rs.getString("patente");
-                Double uLat = rs.getDouble("uLat");
-                Double uLon = rs.getDouble("uLon");
-                GeoPosition geoPosition = new GeoPosition(uLat, uLon);
-                map.put(patente, geoPosition);
+                Vehiculo vehiculo = new Vehiculo();
+                vehiculo.setPatente(rs.getString("patente"));
+                vehiculo.setHoraEntrada(rs.getTimestamp("horaEntrada"));
+                vehiculo.setuLat(rs.getDouble("uLat"));
+                vehiculo.setuLon(rs.getDouble("uLon"));
+                vehiculo.setCalle(rs.getString("calle"));
+                map.put(vehiculo.getPatente(), vehiculo);
             }
             rs.close();
             st.close();
@@ -148,5 +153,39 @@ public class DAOVehiculoImpl extends Database implements DAOVehiculo {
             this.cerrar();
         }
         return map;
+    }
+
+    /**
+     * Obtiene todos los vehiculos de la base de datos
+     *
+     * @return lista de vehiculos
+     * @throws SQLException
+     * @throws ClassNotFoundException
+     */
+    @Override
+    public List<Vehiculo> listarVehiculos() throws SQLException, ClassNotFoundException {
+        List<Vehiculo> vehiculos = new ArrayList<>();
+        try {
+            this.conectar();
+            String query = "SELECT * FROM vehiculo";
+            PreparedStatement st = this.conexion.prepareStatement(query);
+            ResultSet rs = st.executeQuery();
+            while (rs.next()) {
+                Vehiculo vehiculo = new Vehiculo();
+                vehiculo.setPatente(rs.getString("patente"));
+                vehiculo.setHoraEntrada(rs.getTimestamp("horaEntrada"));
+                vehiculo.setCalle(rs.getString("calle"));
+                vehiculo.setuLat(rs.getDouble("uLat"));
+                vehiculo.setuLon(rs.getDouble("uLon"));
+                vehiculos.add(vehiculo);
+            }
+            rs.close();
+            st.close();
+        } catch (Exception e) {
+            throw e;
+        } finally {
+            this.cerrar();
+        }
+        return vehiculos;
     }
 }

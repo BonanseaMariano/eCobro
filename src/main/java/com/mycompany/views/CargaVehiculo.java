@@ -18,10 +18,13 @@ import org.jxmapviewer.viewer.GeoPosition;
 import org.jxmapviewer.viewer.TileFactory;
 import org.jxmapviewer.viewer.TileFactoryInfo;
 
+import javax.swing.*;
 import javax.swing.event.MouseInputListener;
+import javax.swing.text.DefaultFormatter;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Timestamp;
+import java.util.Calendar;
 import java.util.Date;
 
 /**
@@ -36,6 +39,7 @@ public class CargaVehiculo extends javax.swing.JPanel {
         initComponents();
         cargarMapa();
         initStyles();
+        initSpinner();
     }
 
     private void initStyles() {
@@ -45,6 +49,17 @@ public class CargaVehiculo extends javax.swing.JPanel {
         lbl_hora.putClientProperty("FlatLaf.style", "font: 12 $light.font");
         lbl_lat.putClientProperty("FlatLaf.style", "font: 12 $light.font");
         lbl_long.putClientProperty("FlatLaf.style", "font: 12 $light.font");
+    }
+
+    private void initSpinner(){
+        SpinnerDateModel dateModel = new SpinnerDateModel();
+        dateModel.setCalendarField(Calendar.MINUTE);
+        dateModel.setStart(new Date());
+        dateModel.setEnd(null);
+
+        JSpinner spinner = new JSpinner(dateModel);
+        JSpinner.DateEditor editor = new JSpinner.DateEditor(spinner, "HH:mm");
+        sp_hora.setEditor(editor);
     }
 
     private void cargarMapa() {
@@ -57,10 +72,10 @@ public class CargaVehiculo extends javax.swing.JPanel {
         mapViewer.setTileFactory(tileFactory);
 
         // Cofigurar el mapa para que aparezca centrado en el centro de Puerto Madryn
-        mapViewer.setAddressLocation(Utils.convertirCoordenadasGM("-42.766575, -65.033028"));
+        mapViewer.setAddressLocation(Utils.COORDENADAS_PMY);
 
         // Establecer un nivel de zoom inicial
-        mapViewer.setZoom(2);
+        mapViewer.setZoom(Utils.DFAULT_ZOOM);
 
         // Agregar controles de interacción
         MouseInputListener mia = new PanMouseInputListener(mapViewer);
@@ -105,11 +120,12 @@ public class CargaVehiculo extends javax.swing.JPanel {
         lbl_long = new javax.swing.JLabel();
         tf_long = new javax.swing.JTextField();
         bt_cargar = new javax.swing.JButton();
-        tf_hora = new javax.swing.JTextField();
+        sp_hora = new javax.swing.JSpinner();
 
         setBackground(new java.awt.Color(204, 204, 204));
 
         sp_mapa.setBackground(new java.awt.Color(255, 255, 255));
+        sp_mapa.setForeground(new java.awt.Color(255, 255, 255));
         sp_mapa.setPreferredSize(new java.awt.Dimension(800, 600));
 
         bg_contenido.setBackground(new java.awt.Color(255, 255, 255));
@@ -147,7 +163,7 @@ public class CargaVehiculo extends javax.swing.JPanel {
             }
         });
 
-        tf_hora.setBackground(new java.awt.Color(255, 255, 255));
+        sp_hora.setModel(new javax.swing.SpinnerDateModel(new java.util.Date(), null, null, java.util.Calendar.HOUR_OF_DAY));
 
         javax.swing.GroupLayout bg_contenidoLayout = new javax.swing.GroupLayout(bg_contenido);
         bg_contenido.setLayout(bg_contenidoLayout);
@@ -169,11 +185,11 @@ public class CargaVehiculo extends javax.swing.JPanel {
                             .addComponent(lbl_long, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addGroup(bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(tf_patente, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(tf_calle, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(tf_lat, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(tf_long, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(tf_hora, javax.swing.GroupLayout.PREFERRED_SIZE, 198, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                            .addComponent(tf_patente, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
+                            .addComponent(tf_calle, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
+                            .addComponent(tf_lat, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
+                            .addComponent(tf_long, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
+                            .addComponent(sp_hora))))
                 .addContainerGap())
         );
         bg_contenidoLayout.setVerticalGroup(
@@ -189,7 +205,7 @@ public class CargaVehiculo extends javax.swing.JPanel {
                 .addGap(18, 18, 18)
                 .addGroup(bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lbl_hora)
-                    .addComponent(tf_hora, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(sp_hora, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(18, 18, 18)
                 .addGroup(bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(lbl_calle)
@@ -233,7 +249,8 @@ public class CargaVehiculo extends javax.swing.JPanel {
         Double uLat = null;
         Double uLon = null;
         if (!tf_calle.getText().isBlank() && !tf_long.getText().isBlank() && !tf_lat.getText().isBlank()) {
-            hora = new Timestamp(Long.parseLong(tf_hora.getText()));
+            Date aux = (Date) sp_hora.getValue();
+            hora = new Timestamp(aux.getTime());
             uLat = Double.parseDouble(tf_lat.getText());
             uLon = Double.parseDouble(tf_long.getText());
         }
@@ -267,7 +284,7 @@ public class CargaVehiculo extends javax.swing.JPanel {
 
             //Limpiar campos
             tf_patente.setText("");
-            tf_hora.setText("");
+            sp_hora.setValue(new Date());
             tf_lat.setText("");
             tf_long.setText("");
             tf_calle.setText("");
@@ -289,9 +306,9 @@ public class CargaVehiculo extends javax.swing.JPanel {
     private javax.swing.JLabel lbl_long;
     private javax.swing.JLabel lbl_patente;
     private javax.swing.JLabel lbl_titulo;
+    private javax.swing.JSpinner sp_hora;
     private javax.swing.JScrollPane sp_mapa;
     private javax.swing.JTextField tf_calle;
-    private javax.swing.JTextField tf_hora;
     private javax.swing.JTextField tf_lat;
     private javax.swing.JTextField tf_long;
     private javax.swing.JTextField tf_patente;

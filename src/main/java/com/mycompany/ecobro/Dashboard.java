@@ -195,7 +195,7 @@ public class Dashboard extends javax.swing.JFrame {
     }//GEN-LAST:event_bt_AddVehiculoActionPerformed
 
     private void bt_listaVehiculosActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bt_listaVehiculosActionPerformed
-        // TODO add your handling code here:
+        ShowJPanel(new ListaVehiculos());
     }//GEN-LAST:event_bt_listaVehiculosActionPerformed
 
     /**

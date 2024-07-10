@@ -8,6 +8,10 @@ import java.time.LocalDateTime;
 
 public class Utils {
 
+    public static final GeoPosition COORDENADAS_PMY = new GeoPosition(-42.766575, -65.033028);
+    public static final int DFAULT_ZOOM = 3;
+    public static final Double MIN_DIST_CLIC = 4.0;
+
     /**
      * Valida una patente ingresada con el formato "LLNNNLL" (Patentes Argentinas 2015)
      *
@@ -68,4 +72,28 @@ public class Utils {
         double longitud = Double.parseDouble(coordenadas[1].trim());
         return new GeoPosition(latitud, longitud);
     }
+
+    /**
+     * Calcula la distancia entre dos GeoPositions
+     *
+     * @param pos1 GeoPosition 1
+     * @param pos2 GeoPosition 2
+     * @return distancia en metros
+     */
+    public static double calcularDistancia(GeoPosition pos1, GeoPosition pos2) {
+        double R = 6371e3; // Radio de la Tierra en metros
+
+        double lat1Rad = Math.toRadians(pos1.getLatitude());
+        double lat2Rad = Math.toRadians(pos2.getLongitude());
+        double deltaLat = Math.toRadians(pos2.getLatitude() - pos1.getLatitude());
+        double deltaLon = Math.toRadians(pos2.getLongitude() - pos1.getLongitude());
+
+        double a = Math.sin(deltaLat / 2) * Math.sin(deltaLat / 2) +
+                Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+                        Math.sin(deltaLon / 2) * Math.sin(deltaLon / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return R * c;
+    }
+
 }
