@@ -81,13 +81,13 @@
                               <Component id="lbl_lat" alignment="0" max="32767" attributes="0"/>
                               <Component id="lbl_long" alignment="0" max="32767" attributes="0"/>
                           </Group>
-                          <EmptySpace min="-2" max="-2" attributes="0"/>
+                          <EmptySpace max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="tf_patente" alignment="0" pref="198" max="32767" attributes="0"/>
                               <Component id="tf_calle" alignment="0" pref="198" max="32767" attributes="0"/>
                               <Component id="tf_lat" alignment="0" pref="198" max="32767" attributes="0"/>
                               <Component id="tf_long" alignment="0" pref="198" max="32767" attributes="0"/>
-                              <Component id="sp_hora" alignment="0" max="32767" attributes="0"/>
+                              <Component id="tf_hora" alignment="1" pref="198" max="32767" attributes="0"/>
                           </Group>
                       </Group>
                   </Group>
@@ -109,7 +109,7 @@
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
                       <Component id="lbl_hora" alignment="3" min="-2" max="-2" attributes="0"/>
-                      <Component id="sp_hora" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="tf_hora" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <EmptySpace type="separate" max="-2" attributes="0"/>
                   <Group type="103" groupAlignment="3" attributes="0">
@@ -212,10 +212,10 @@
             <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="bt_cargarActionPerformed"/>
           </Events>
         </Component>
-        <Component class="javax.swing.JSpinner" name="sp_hora">
+        <Component class="javax.swing.JTextField" name="tf_hora">
           <Properties>
-            <Property name="model" type="javax.swing.SpinnerModel" editor="org.netbeans.modules.form.editors2.SpinnerModelEditor">
-              <SpinnerModel initial="now" stepSize="11" type="date"/>
+            <Property name="background" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+              <Color blue="ff" green="ff" red="ff" type="rgb"/>
             </Property>
           </Properties>
         </Component>

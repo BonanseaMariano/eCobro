@@ -5,10 +5,12 @@ import org.jxmapviewer.viewer.GeoPosition;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Utils {
 
     public static final GeoPosition COORDENADAS_PMY = new GeoPosition(-42.766575, -65.033028);
+    public static final Double PRECIO_POR_MEDIAHORA = 2500.0;
     public static final int DFAULT_ZOOM = 3;
     public static final Double MIN_DIST_CLIC = 4.0;
 
@@ -63,7 +65,7 @@ public class Utils {
     /**
      * Crea un GeoPosition a partir de una latitud y longitud de GoogleMaps
      *
-     * @param latitudLongitud  coordenadas de latitud y longitud como aparecen en google maps (Ejemplo: -42.766575, -65.033028)
+     * @param latitudLongitud coordenadas de latitud y longitud como aparecen en google maps (Ejemplo: -42.766575, -65.033028)
      * @return GeoPosition
      */
     public static GeoPosition convertirCoordenadasGM(String latitudLongitud) {
@@ -96,4 +98,20 @@ public class Utils {
         return R * c;
     }
 
+    /**
+     * Valida una hora ingresada con el formato HH:mm
+     *
+     * @param time hora a validar
+     * @return true si es correcta
+     */
+    public static boolean validarHora(String time) {
+        if (time.length() != 5) {
+            return false;
+        }
+        char[] caracteres = time.toCharArray();
+        if (!Character.isDigit(caracteres[0]) || !Character.isDigit(caracteres[1]) || caracteres[2] != ':' || !Character.isDigit(caracteres[3]) || !Character.isDigit(caracteres[4])) {
+            return false;
+        }
+        return true;
+    }
 }

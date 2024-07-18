@@ -18,15 +18,19 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Logger;
 
 /**
  * @author Mariano
  */
 public class UbicacionesVehiculos extends javax.swing.JPanel {
+
+    private Vehiculo vehiculoSel = null;
 
     private class LabeledWaypoint extends DefaultWaypoint {
         private final String label;
@@ -125,6 +129,7 @@ public class UbicacionesVehiculos extends javax.swing.JPanel {
                     if (Utils.calcularDistancia(v.getGeoPosition(), geoPosition) < Utils.MIN_DIST_CLIC) {
                         tf_patente.setText(v.getPatente());
                         tf_tiempoEstacionado.setText(Utils.impresionDuracion(Utils.calcularHoras(v.getHoraEntrada(), new Timestamp(System.currentTimeMillis()))));
+                        vehiculoSel = v;
                         break;
                     }
                 }
@@ -181,50 +186,79 @@ public class UbicacionesVehiculos extends javax.swing.JPanel {
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(sp_mapa, javax.swing.GroupLayout.DEFAULT_SIZE, 910, Short.MAX_VALUE)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                                .addComponent(lb_titulo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addGroup(layout.createSequentialGroup()
-                                    .addComponent(lb_patente)
-                                    .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                    .addComponent(tf_patente))
-                                .addGroup(layout.createSequentialGroup()
-                                    .addGap(35, 35, 35)
-                                    .addComponent(lb_tiempoEstacionado)))
-                            .addComponent(tf_tiempoEstacionado, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(56, 56, 56)
-                        .addComponent(bt_cobrar)))
-                .addContainerGap())
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(sp_mapa, javax.swing.GroupLayout.DEFAULT_SIZE, 910, Short.MAX_VALUE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                                .addComponent(lb_titulo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                                .addGroup(layout.createSequentialGroup()
+                                                                        .addComponent(lb_patente)
+                                                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                                        .addComponent(tf_patente))
+                                                                .addGroup(layout.createSequentialGroup()
+                                                                        .addGap(35, 35, 35)
+                                                                        .addComponent(lb_tiempoEstacionado)))
+                                                        .addComponent(tf_tiempoEstacionado, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                                        .addGroup(layout.createSequentialGroup()
+                                                .addGap(56, 56, 56)
+                                                .addComponent(bt_cobrar)))
+                                .addContainerGap())
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(sp_mapa, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lb_titulo)
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lb_patente)
-                    .addComponent(tf_patente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(lb_tiempoEstacionado)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(tf_tiempoEstacionado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                .addComponent(bt_cobrar)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(sp_mapa, javax.swing.GroupLayout.DEFAULT_SIZE, 300, Short.MAX_VALUE)
+                        .addGroup(layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(lb_titulo)
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lb_patente)
+                                        .addComponent(tf_patente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(18, 18, 18)
+                                .addComponent(lb_tiempoEstacionado)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(tf_tiempoEstacionado, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(bt_cobrar)
+                                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
     }// </editor-fold>//GEN-END:initComponents
 
     private void bt_cobrarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bt_cobrarActionPerformed
-        // TODO add your handling code here:
+        if (vehiculoSel != null) {
+            DAOVehiculoImpl dao = new DAOVehiculoImpl();
+            // Obtener la hora de entrada del vehículo
+            Timestamp horaEntrada = vehiculoSel.getHoraEntrada();
+            Timestamp horaSalida = new Timestamp(System.currentTimeMillis());
+
+            // Calcular la diferencia de tiempo en minutos
+            long diffMinutes = (horaSalida.getTime() - horaEntrada.getTime()) / (60 * 1000);
+
+            // Calcular el importe a abonar
+            double importe = Utils.PRECIO_POR_MEDIAHORA * (diffMinutes / 30);
+
+            // Mostrar el mensaje con el importe a abonar
+            javax.swing.JOptionPane.showMessageDialog(this, "Importe a abonar: $" + importe + ".\n", "AVISO", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+
+            //Borrar el vehiculo de la base de datos
+            try {
+                dao.eliminar(vehiculoSel);
+            } catch (Exception e) {
+                throw new RuntimeException(e);
+            }
+
+            //Limpiar los campos
+            tf_patente.setText("");
+            tf_tiempoEstacionado.setText("");
+            vehiculoSel = null;
+
+            //Actualizar el mapa
+            cargarMapa();
+        }
     }//GEN-LAST:event_bt_cobrarActionPerformed
 
 

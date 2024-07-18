@@ -24,6 +24,11 @@ import javax.swing.text.DefaultFormatter;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -39,9 +44,11 @@ public class CargaVehiculo extends javax.swing.JPanel {
         initComponents();
         cargarMapa();
         initStyles();
-        initSpinner();
     }
 
+    /**
+     * Inicializa los estilos del panel con FlatLaf
+     */
     private void initStyles() {
         lbl_titulo.putClientProperty("FlatLaf.style", "font: bold $h1.regular.font");
         lbl_patente.putClientProperty("FlatLaf.style", "font: 12 $light.font");
@@ -51,17 +58,9 @@ public class CargaVehiculo extends javax.swing.JPanel {
         lbl_long.putClientProperty("FlatLaf.style", "font: 12 $light.font");
     }
 
-    private void initSpinner(){
-        SpinnerDateModel dateModel = new SpinnerDateModel();
-        dateModel.setCalendarField(Calendar.MINUTE);
-        dateModel.setStart(new Date());
-        dateModel.setEnd(null);
-
-        JSpinner spinner = new JSpinner(dateModel);
-        JSpinner.DateEditor editor = new JSpinner.DateEditor(spinner, "HH:mm");
-        sp_hora.setEditor(editor);
-    }
-
+    /**
+     * Inicializa el mapa con OpenStreetMap y un listener para obtener las coordenadas
+     */
     private void cargarMapa() {
         // Crear el mapa
         JXMapViewer mapViewer = new JXMapViewer();
@@ -120,7 +119,7 @@ public class CargaVehiculo extends javax.swing.JPanel {
         lbl_long = new javax.swing.JLabel();
         tf_long = new javax.swing.JTextField();
         bt_cargar = new javax.swing.JButton();
-        sp_hora = new javax.swing.JSpinner();
+        tf_hora = new javax.swing.JTextField();
 
         setBackground(new java.awt.Color(204, 204, 204));
 
@@ -163,111 +162,125 @@ public class CargaVehiculo extends javax.swing.JPanel {
             }
         });
 
-        sp_hora.setModel(new javax.swing.SpinnerDateModel(new java.util.Date(), null, null, java.util.Calendar.HOUR_OF_DAY));
+        tf_hora.setBackground(new java.awt.Color(255, 255, 255));
 
         javax.swing.GroupLayout bg_contenidoLayout = new javax.swing.GroupLayout(bg_contenido);
         bg_contenido.setLayout(bg_contenidoLayout);
         bg_contenidoLayout.setHorizontalGroup(
-            bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(bg_contenidoLayout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(bt_cargar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(lbl_titulo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSeparator1)
-                    .addGroup(bg_contenidoLayout.createSequentialGroup()
-                        .addGap(6, 6, 6)
-                        .addGroup(bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(lbl_patente, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lbl_hora, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lbl_calle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lbl_lat, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(lbl_long, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addGroup(bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(tf_patente, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
-                            .addComponent(tf_calle, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
-                            .addComponent(tf_lat, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
-                            .addComponent(tf_long, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
-                            .addComponent(sp_hora))))
-                .addContainerGap())
+                bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(bg_contenidoLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addGroup(bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                        .addComponent(bt_cargar, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(lbl_titulo, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addComponent(jSeparator1)
+                                        .addGroup(bg_contenidoLayout.createSequentialGroup()
+                                                .addGap(6, 6, 6)
+                                                .addGroup(bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                                        .addComponent(lbl_patente, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(lbl_hora, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(lbl_calle, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(lbl_lat, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                                        .addComponent(lbl_long, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                                .addGroup(bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                                        .addComponent(tf_patente, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
+                                                        .addComponent(tf_calle, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
+                                                        .addComponent(tf_lat, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
+                                                        .addComponent(tf_long, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE)
+                                                        .addComponent(tf_hora, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 198, Short.MAX_VALUE))))
+                                .addContainerGap())
         );
         bg_contenidoLayout.setVerticalGroup(
-            bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(bg_contenidoLayout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(lbl_titulo, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGroup(bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(tf_patente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(lbl_patente))
-                .addGap(18, 18, 18)
-                .addGroup(bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lbl_hora)
-                    .addComponent(sp_hora, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lbl_calle)
-                    .addComponent(tf_calle, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lbl_lat)
-                    .addComponent(tf_lat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addGroup(bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(lbl_long)
-                    .addComponent(tf_long, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(18, 18, 18)
-                .addComponent(bt_cargar)
-                .addContainerGap(43, Short.MAX_VALUE))
+                bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(bg_contenidoLayout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(lbl_titulo, javax.swing.GroupLayout.PREFERRED_SIZE, 37, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 10, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGroup(bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(tf_patente, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addComponent(lbl_patente))
+                                .addGap(18, 18, 18)
+                                .addGroup(bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lbl_hora)
+                                        .addComponent(tf_hora, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(18, 18, 18)
+                                .addGroup(bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lbl_calle)
+                                        .addComponent(tf_calle, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(18, 18, 18)
+                                .addGroup(bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lbl_lat)
+                                        .addComponent(tf_lat, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(18, 18, 18)
+                                .addGroup(bg_contenidoLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                        .addComponent(lbl_long)
+                                        .addComponent(tf_long, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addGap(18, 18, 18)
+                                .addComponent(bt_cargar)
+                                .addContainerGap(43, Short.MAX_VALUE))
         );
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addComponent(sp_mapa, javax.swing.GroupLayout.DEFAULT_SIZE, 818, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(bg_contenido, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createSequentialGroup()
+                                .addComponent(sp_mapa, javax.swing.GroupLayout.DEFAULT_SIZE, 818, Short.MAX_VALUE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(bg_contenido, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addContainerGap())
         );
         layout.setVerticalGroup(
-            layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(sp_mapa, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
-            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                .addContainerGap()
-                .addComponent(bg_contenido, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addContainerGap())
+                layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addComponent(sp_mapa, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
+                        .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addContainerGap()
+                                .addComponent(bg_contenido, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
 
-    private void bt_cargarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bt_cargarActionPerformed
-        String patente = tf_patente.getText();
-        Timestamp hora = null;
-        Double uLat = null;
-        Double uLon = null;
-        if (!tf_calle.getText().isBlank() && !tf_long.getText().isBlank() && !tf_lat.getText().isBlank()) {
-            Date aux = (Date) sp_hora.getValue();
-            hora = new Timestamp(aux.getTime());
-            uLat = Double.parseDouble(tf_lat.getText());
-            uLon = Double.parseDouble(tf_long.getText());
-        }
-
-        String calle = tf_calle.getText();
-
+    /**
+     * Pulsacion del boton para cargar vehiculo
+     *
+     * @param evt
+     */
+    private void bt_cargarActionPerformed(java.awt.event.ActionEvent evt) {
         //Validacion de campos
-        if (patente.isEmpty() || uLat == null || uLon == null || calle.isEmpty() || hora == null) {
+        if (tf_patente.getText().isEmpty() || tf_lat.getText().isEmpty() || tf_long.getText().isEmpty() || tf_hora.getText().isEmpty() || tf_calle.getText().isEmpty()) {
             javax.swing.JOptionPane.showMessageDialog(this, "Debe llenar todos los campos. \n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
             tf_patente.requestFocus();
             return;
-        } else if (!Utils.validarPatente(patente)) {
-            System.out.println(patente + " " + patente.length());
+        } else if (!Utils.validarPatente(tf_patente.getText())) {
             javax.swing.JOptionPane.showMessageDialog(this, "Patente Invalida, debe ser formato \"LLNNNLL\" \n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
             tf_patente.requestFocus();
             return;
+        } else if (!Utils.validarHora(tf_hora.getText())) {
+            javax.swing.JOptionPane.showMessageDialog(this, "Hora Invalida, debe ser formato \"HH:MM\" \n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
+            tf_hora.requestFocus();
+            return;
         }
+
+        //Asignacion de valores
+        String patente = tf_patente.getText();
+        Timestamp hora = null;
+        Double uLat = Double.parseDouble(tf_lat.getText());
+        Double uLon = Double.parseDouble(tf_long.getText());
+        String calle = tf_calle.getText();
+
+        //Obtener fecha actual
+        LocalDate currentDate = LocalDate.now();
+
+        //Obtener hora y minutos del textField
+        String timeString = tf_hora.getText();
+        LocalTime time = LocalTime.parse(timeString);
+
+        //Combinar fecha y hora
+        LocalDateTime dateTime = LocalDateTime.of(currentDate, time);
+
+        hora = new Timestamp(Timestamp.valueOf(dateTime).getTime());
 
         //Registro de vehiculo
         Vehiculo vehiculo = new Vehiculo();
@@ -284,7 +297,7 @@ public class CargaVehiculo extends javax.swing.JPanel {
 
             //Limpiar campos
             tf_patente.setText("");
-            sp_hora.setValue(new Date());
+            tf_hora.setText("");
             tf_lat.setText("");
             tf_long.setText("");
             tf_calle.setText("");
@@ -306,9 +319,9 @@ public class CargaVehiculo extends javax.swing.JPanel {
     private javax.swing.JLabel lbl_long;
     private javax.swing.JLabel lbl_patente;
     private javax.swing.JLabel lbl_titulo;
-    private javax.swing.JSpinner sp_hora;
     private javax.swing.JScrollPane sp_mapa;
     private javax.swing.JTextField tf_calle;
+    private javax.swing.JTextField tf_hora;
     private javax.swing.JTextField tf_lat;
     private javax.swing.JTextField tf_long;
     private javax.swing.JTextField tf_patente;

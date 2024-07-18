@@ -24,10 +24,10 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Component id="sp_vehiculos" alignment="0" max="32767" attributes="0"/>
-          <Group type="102" alignment="1" attributes="0">
-              <EmptySpace min="-2" pref="529" max="-2" attributes="0"/>
-              <Component id="bt_eliminar" pref="0" max="32767" attributes="0"/>
+          <Component id="sp_vehiculos" alignment="0" pref="1100" max="32767" attributes="0"/>
+          <Group type="102" alignment="0" attributes="0">
+              <EmptySpace min="-2" pref="512" max="-2" attributes="0"/>
+              <Component id="bt_eliminar" max="32767" attributes="0"/>
               <EmptySpace min="-2" pref="498" max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -35,10 +35,10 @@
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
           <Group type="102" alignment="0" attributes="0">
-              <Component id="sp_vehiculos" min="-2" pref="270" max="-2" attributes="0"/>
-              <EmptySpace max="32767" attributes="0"/>
+              <Component id="sp_vehiculos" pref="265" max="32767" attributes="0"/>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
               <Component id="bt_eliminar" min="-2" max="-2" attributes="0"/>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -60,6 +60,9 @@
                 <Column editable="true" title="Title 3" type="java.lang.Object"/>
                 <Column editable="true" title="Title 4" type="java.lang.Object"/>
               </Table>
+            </Property>
+            <Property name="cursor" type="java.awt.Cursor" editor="org.netbeans.modules.form.editors2.CursorEditor">
+              <Color id="Hand Cursor"/>
             </Property>
             <Property name="showGrid" type="boolean" value="false"/>
           </Properties>
