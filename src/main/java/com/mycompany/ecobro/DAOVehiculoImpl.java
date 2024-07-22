@@ -3,7 +3,6 @@ package com.mycompany.ecobro;
 import com.mycompany.database.Database;
 import com.mycompany.interfaces.DAOVehiculo;
 import com.mycompany.models.Vehiculo;
-import org.jxmapviewer.viewer.GeoPosition;
 
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -20,7 +19,7 @@ public class DAOVehiculoImpl extends Database implements DAOVehiculo {
      * Registra un vehiculo en la base de datos
      *
      * @param vehiculo vehiculo a registrar
-     * @throws Exception
+     * @throws Exception Si ocurre un error al registrar el vehiculo
      */
     @Override
     public void registrar(Vehiculo vehiculo) throws Exception {
@@ -35,6 +34,7 @@ public class DAOVehiculoImpl extends Database implements DAOVehiculo {
             st.executeUpdate();
             st.close();
         } catch (Exception e) {
+
             throw e;
         } finally {
             this.cerrar();
@@ -90,39 +90,6 @@ public class DAOVehiculoImpl extends Database implements DAOVehiculo {
     }
 
     /**
-     * Obtiene un vehiculo de la base de datos
-     *
-     * @param patente patente del vehiculo
-     * @return vehiculo
-     * @throws Exception
-     */
-    @Override
-    public Vehiculo getVPatente(String patente) throws Exception {
-        Vehiculo vehiculo = null;
-        try {
-            this.conectar();
-            PreparedStatement st = this.conexion.prepareStatement("SELECT * FROM vehiculo WHERE patente = ? LIMIT 1");
-            st.setString(1, patente);
-            ResultSet rs = st.executeQuery();
-            while (rs.next()) {
-                vehiculo = new Vehiculo();
-                vehiculo.setPatente(rs.getString("patente"));
-                vehiculo.setHoraEntrada(rs.getTimestamp("horaEntrada"));
-                vehiculo.setCalle(rs.getString("calle"));
-                vehiculo.setuLat(rs.getDouble("uLat"));
-                vehiculo.setuLon(rs.getDouble("uLon"));
-            }
-            rs.close();
-            st.close();
-        } catch (Exception e) {
-            throw e;
-        } finally {
-            this.cerrar();
-        }
-        return null;
-    }
-
-    /**
      * Crea un mapa de patentes y sus Geopositions
      *
      * @return un hasmap de patentes y sus geopositions
@@ -163,7 +130,7 @@ public class DAOVehiculoImpl extends Database implements DAOVehiculo {
      * @throws ClassNotFoundException
      */
     @Override
-    public List<Vehiculo> listarVehiculos() throws SQLException, ClassNotFoundException {
+    public List<Vehiculo> listarVehiculos() throws Exception {
         List<Vehiculo> vehiculos = new ArrayList<>();
         try {
             this.conectar();

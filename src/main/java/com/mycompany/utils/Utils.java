@@ -5,14 +5,8 @@ import org.jxmapviewer.viewer.GeoPosition;
 import java.sql.Timestamp;
 import java.time.Duration;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 public class Utils {
-
-    public static final GeoPosition COORDENADAS_PMY = new GeoPosition(-42.766575, -65.033028);
-    public static final Double PRECIO_POR_MEDIAHORA = 2500.0;
-    public static final int DFAULT_ZOOM = 3;
-    public static final Double MIN_DIST_CLIC = 4.0;
 
     /**
      * Valida una patente ingresada con el formato "LLNNNLL" (Patentes Argentinas 2015)

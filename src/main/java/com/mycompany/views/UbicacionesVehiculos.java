@@ -6,6 +6,7 @@ package com.mycompany.views;
 
 import com.mycompany.ecobro.DAOVehiculoImpl;
 import com.mycompany.models.Vehiculo;
+import com.mycompany.utils.Constants;
 import com.mycompany.utils.Utils;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
@@ -18,12 +19,10 @@ import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Point2D;
-import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 /**
  * @author Mariano
@@ -104,11 +103,11 @@ public class UbicacionesVehiculos extends javax.swing.JPanel {
         if (!waypoints.isEmpty()) {
             mapViewer.setAddressLocation(waypoints.iterator().next().getPosition());
         } else {
-            mapViewer.setAddressLocation(Utils.COORDENADAS_PMY);
+            mapViewer.setAddressLocation(Constants.COORDENADAS_PMY);
         }
 
         // Establecer un nivel de zoom inicial
-        mapViewer.setZoom(Utils.DFAULT_ZOOM);
+        mapViewer.setZoom(Constants.DFAULT_ZOOM);
 
         // Agregar controles de interacción
         MouseInputListener mia = new PanMouseInputListener(mapViewer);
@@ -126,7 +125,7 @@ public class UbicacionesVehiculos extends javax.swing.JPanel {
 
                 //Recorro todas las posiciones y veo cual es la mas cercana a la del clic (BAJO RENDIMIENTO CUANDO SON MUCHOS VEHICULOS POR COMPLEJIDAD LINEAL)
                 for (Vehiculo v : finalLabeledPositions.values()) {
-                    if (Utils.calcularDistancia(v.getGeoPosition(), geoPosition) < Utils.MIN_DIST_CLIC) {
+                    if (Utils.calcularDistancia(v.getGeoPosition(), geoPosition) < Constants.MIN_DIST_CLIC) {
                         tf_patente.setText(v.getPatente());
                         tf_tiempoEstacionado.setText(Utils.impresionDuracion(Utils.calcularHoras(v.getHoraEntrada(), new Timestamp(System.currentTimeMillis()))));
                         vehiculoSel = v;
@@ -239,7 +238,7 @@ public class UbicacionesVehiculos extends javax.swing.JPanel {
             long diffMinutes = (horaSalida.getTime() - horaEntrada.getTime()) / (60 * 1000);
 
             // Calcular el importe a abonar
-            double importe = Utils.PRECIO_POR_MEDIAHORA * (diffMinutes / 30);
+            double importe = Constants.PRECIO_POR_MEDIAHORA * (diffMinutes / 30);
 
             // Mostrar el mensaje con el importe a abonar
             javax.swing.JOptionPane.showMessageDialog(this, "Importe a abonar: $" + importe + ".\n", "AVISO", javax.swing.JOptionPane.INFORMATION_MESSAGE);

@@ -4,10 +4,10 @@
  */
 package com.mycompany.views;
 
-import com.formdev.flatlaf.intellijthemes.materialthemeuilite.FlatMaterialLighterIJTheme;
 import com.mycompany.ecobro.DAOVehiculoImpl;
 import com.mycompany.interfaces.DAOVehiculo;
 import com.mycompany.models.Vehiculo;
+import com.mycompany.utils.Constants;
 import com.mycompany.utils.Utils;
 import org.jxmapviewer.JXMapViewer;
 import org.jxmapviewer.OSMTileFactoryInfo;
@@ -18,19 +18,14 @@ import org.jxmapviewer.viewer.GeoPosition;
 import org.jxmapviewer.viewer.TileFactory;
 import org.jxmapviewer.viewer.TileFactoryInfo;
 
-import javax.swing.*;
 import javax.swing.event.MouseInputListener;
-import javax.swing.text.DefaultFormatter;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Calendar;
-import java.util.Date;
+
 
 /**
  * @author Mariano
@@ -59,22 +54,11 @@ public class CargaVehiculo extends javax.swing.JPanel {
     }
 
     /**
-     * Inicializa el mapa con OpenStreetMap y un listener para obtener las coordenadas
+     * Inicializa el mapa con un listener para obtener las coordenadas
      */
     private void cargarMapa() {
         // Crear el mapa
-        JXMapViewer mapViewer = new JXMapViewer();
-
-        // Configurar el TileFactory con OpenStreetMap
-        TileFactoryInfo info = new OSMTileFactoryInfo();
-        TileFactory tileFactory = new DefaultTileFactory(info);
-        mapViewer.setTileFactory(tileFactory);
-
-        // Cofigurar el mapa para que aparezca centrado en el centro de Puerto Madryn
-        mapViewer.setAddressLocation(Utils.COORDENADAS_PMY);
-
-        // Establecer un nivel de zoom inicial
-        mapViewer.setZoom(Utils.DFAULT_ZOOM);
+        JXMapViewer mapViewer = getJxMapViewer();
 
         // Agregar controles de interacción
         MouseInputListener mia = new PanMouseInputListener(mapViewer);
@@ -94,6 +78,27 @@ public class CargaVehiculo extends javax.swing.JPanel {
 
         // Agregar el mapa al JScrollPane
         sp_mapa.setViewportView(mapViewer);
+    }
+
+    /**
+     * Crea el mapa con OpenStreetMap
+     *
+     * @return el mapa en forma de JXMapViewer
+     */
+    private static JXMapViewer getJxMapViewer() {
+        JXMapViewer mapViewer = new JXMapViewer();
+
+        // Configurar el TileFactory con OpenStreetMap
+        TileFactoryInfo info = new OSMTileFactoryInfo();
+        TileFactory tileFactory = new DefaultTileFactory(info);
+        mapViewer.setTileFactory(tileFactory);
+
+        // Cofigurar el mapa para que aparezca centrado en el centro de Puerto Madryn
+        mapViewer.setAddressLocation(Constants.COORDENADAS_PMY);
+
+        // Establecer un nivel de zoom inicial
+        mapViewer.setZoom(Constants.DFAULT_ZOOM);
+        return mapViewer;
     }
 
     /**
@@ -158,7 +163,7 @@ public class CargaVehiculo extends javax.swing.JPanel {
         bt_cargar.setCursor(new java.awt.Cursor(java.awt.Cursor.HAND_CURSOR));
         bt_cargar.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                bt_cargarActionPerformed(evt);
+                bt_cargarActionPerformed();
             }
         });
 
@@ -244,10 +249,8 @@ public class CargaVehiculo extends javax.swing.JPanel {
 
     /**
      * Pulsacion del boton para cargar vehiculo
-     *
-     * @param evt
      */
-    private void bt_cargarActionPerformed(java.awt.event.ActionEvent evt) {
+    private void bt_cargarActionPerformed() {
         //Validacion de campos
         if (tf_patente.getText().isEmpty() || tf_lat.getText().isEmpty() || tf_long.getText().isEmpty() || tf_hora.getText().isEmpty() || tf_calle.getText().isEmpty()) {
             javax.swing.JOptionPane.showMessageDialog(this, "Debe llenar todos los campos. \n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
@@ -265,7 +268,7 @@ public class CargaVehiculo extends javax.swing.JPanel {
 
         //Asignacion de valores
         String patente = tf_patente.getText();
-        Timestamp hora = null;
+        Timestamp hora;
         Double uLat = Double.parseDouble(tf_lat.getText());
         Double uLon = Double.parseDouble(tf_long.getText());
         String calle = tf_calle.getText();
