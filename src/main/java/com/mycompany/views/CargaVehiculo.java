@@ -19,12 +19,14 @@ import org.jxmapviewer.viewer.TileFactory;
 import org.jxmapviewer.viewer.TileFactoryInfo;
 
 import javax.swing.event.MouseInputListener;
+import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 
 
 /**
@@ -37,6 +39,7 @@ public class CargaVehiculo extends javax.swing.JPanel {
      */
     public CargaVehiculo() {
         initComponents();
+        actualizarHora();
         cargarMapa();
         initStyles();
     }
@@ -51,6 +54,15 @@ public class CargaVehiculo extends javax.swing.JPanel {
         lbl_hora.putClientProperty("FlatLaf.style", "font: 12 $light.font");
         lbl_lat.putClientProperty("FlatLaf.style", "font: 12 $light.font");
         lbl_long.putClientProperty("FlatLaf.style", "font: 12 $light.font");
+        bt_cargar.putClientProperty("FlatLaf.style", "font: 14 $light.font");
+
+        lbl_titulo.setForeground(Color.BLACK);
+        lbl_patente.setForeground(Color.BLACK);
+        lbl_calle.setForeground(Color.BLACK);
+        lbl_hora.setForeground(Color.BLACK);
+        lbl_lat.setForeground(Color.BLACK);
+        lbl_long.setForeground(Color.BLACK);
+        bt_cargar.setForeground(Color.BLACK);
     }
 
     /**
@@ -60,6 +72,40 @@ public class CargaVehiculo extends javax.swing.JPanel {
         // Crear el mapa
         JXMapViewer mapViewer = getJxMapViewer();
 
+        // Agregarle los controles de interacción al mapa
+        agregarControlesMapa(mapViewer);
+
+        // Agregar el mapa al JScrollPane
+        sp_mapa.setViewportView(mapViewer);
+    }
+
+    /**
+     * Crea el mapa con OpenStreetMap
+     *
+     * @return el mapa en forma de JXMapViewer
+     */
+    private JXMapViewer getJxMapViewer() {
+        JXMapViewer mapViewer = new JXMapViewer();
+
+        // Configurar el TileFactory con OpenStreetMap
+        TileFactoryInfo info = new OSMTileFactoryInfo();
+        TileFactory tileFactory = new DefaultTileFactory(info);
+        mapViewer.setTileFactory(tileFactory);
+
+        // Cofigurar el mapa para que aparezca centrado en el centro de Puerto Madryn
+        mapViewer.setAddressLocation(Constants.COORDENADAS_PMY);
+
+        // Establecer un nivel de zoom inicial
+        mapViewer.setZoom(Constants.DFAULT_ZOOM);
+        return mapViewer;
+    }
+
+    /**
+     * Agrega los controles de interacción al mapa
+     *
+     * @param mapViewer el mapa en formato JXMapViewer
+     */
+    private void agregarControlesMapa(JXMapViewer mapViewer) {
         // Agregar controles de interacción
         MouseInputListener mia = new PanMouseInputListener(mapViewer);
         mapViewer.addMouseListener(mia);
@@ -75,30 +121,18 @@ public class CargaVehiculo extends javax.swing.JPanel {
                 tf_long.setText(String.valueOf(geoPosition.getLongitude()));
             }
         });
-
-        // Agregar el mapa al JScrollPane
-        sp_mapa.setViewportView(mapViewer);
     }
 
-    /**
-     * Crea el mapa con OpenStreetMap
-     *
-     * @return el mapa en forma de JXMapViewer
-     */
-    private static JXMapViewer getJxMapViewer() {
-        JXMapViewer mapViewer = new JXMapViewer();
+    private void actualizarHora() {
+        // Obtener la fecha y hora actual
+        LocalDateTime now = LocalDateTime.now();
 
-        // Configurar el TileFactory con OpenStreetMap
-        TileFactoryInfo info = new OSMTileFactoryInfo();
-        TileFactory tileFactory = new DefaultTileFactory(info);
-        mapViewer.setTileFactory(tileFactory);
+        // Formatear la hora y minutos en el formato "HH:mm"
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
+        String horaFormateada = now.format(formatter);
 
-        // Cofigurar el mapa para que aparezca centrado en el centro de Puerto Madryn
-        mapViewer.setAddressLocation(Constants.COORDENADAS_PMY);
-
-        // Establecer un nivel de zoom inicial
-        mapViewer.setZoom(Constants.DFAULT_ZOOM);
-        return mapViewer;
+        // Cargar la hora y minutos en el JTextField
+        tf_hora.setText(horaFormateada);
     }
 
     /**
@@ -257,7 +291,7 @@ public class CargaVehiculo extends javax.swing.JPanel {
             tf_patente.requestFocus();
             return;
         } else if (!Utils.validarPatente(tf_patente.getText())) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Patente Invalida, debe ser formato \"LLNNNLL\" \n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
+            javax.swing.JOptionPane.showMessageDialog(this, "Patente Invalida, debe ser formato \"LLNNNLL\" o \"LLLNNN\" \n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
             tf_patente.requestFocus();
             return;
         } else if (!Utils.validarHora(tf_hora.getText())) {
@@ -267,7 +301,7 @@ public class CargaVehiculo extends javax.swing.JPanel {
         }
 
         //Asignacion de valores
-        String patente = tf_patente.getText();
+        String patente = tf_patente.getText().toUpperCase();
         Timestamp hora;
         Double uLat = Double.parseDouble(tf_lat.getText());
         Double uLon = Double.parseDouble(tf_long.getText());
@@ -300,7 +334,7 @@ public class CargaVehiculo extends javax.swing.JPanel {
 
             //Limpiar campos
             tf_patente.setText("");
-            tf_hora.setText("");
+            actualizarHora();
             tf_lat.setText("");
             tf_long.setText("");
             tf_calle.setText("");

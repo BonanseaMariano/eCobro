@@ -12,6 +12,8 @@ import javax.swing.event.TableModelEvent;
 import javax.swing.event.TableModelListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -19,19 +21,18 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.TableCellRenderer;
 import javax.swing.SwingConstants;
-import javax.swing.BorderFactory;
 
 /**
  * @author Mariano
  */
 public class ListaVehiculos extends javax.swing.JPanel {
-    //Mapa de patentes con llave = indice de la tabla, valor = Vehiculo
-    private static Map<Integer, Vehiculo> mapaPatentes = new HashMap<>();
+    //Mapa de patentes
+    private static Map<String, Vehiculo> mapaPatentes;
+    private String patentePrev;
 
     /**
      * Creates new form ListaVehiculos
@@ -69,7 +70,7 @@ public class ListaVehiculos extends javax.swing.JPanel {
 
         try {
             // Obtener la lista de vehículos
-            List<Vehiculo> vehiculos = dao.listarVehiculos();
+            mapaPatentes = dao.mapaVehiculos();
 
             // Crear un DefaultTableModel con las columnas "patente", "calle" y "Hora Estacionamiento"
             DefaultTableModel model = new DefaultTableModel();
@@ -78,20 +79,13 @@ public class ListaVehiculos extends javax.swing.JPanel {
             model.addColumn("Calle");
             model.addColumn("Hora Estacionamiento");
 
-            //Contador para el mapa de patentes
-            int temp = 0;
-
             // Agregar los datos de los vehículos del dia al modelo
-            for (Vehiculo vehiculo : vehiculos) {
+            for (Vehiculo vehiculo : mapaPatentes.values()) {
                 LocalDateTime entradaDateTime = LocalDateTime.ofInstant(vehiculo.getHoraEntrada().toInstant(), ZoneId.systemDefault());
                 LocalTime horaEntrada = entradaDateTime.toLocalTime();
                 String horaFormateada = horaEntrada.format(DateTimeFormatter.ofPattern("HH:mm"));
                 Object[] rowData = {vehiculo.getPatente(), vehiculo.getCalle(), horaFormateada};
                 model.addRow(rowData);
-
-                //inicializo mapa patentes para actualizaciones de la tabla
-                mapaPatentes.put(temp, vehiculo);
-                temp++;
             }
 
             // Agregar un listener para detectar cambios en los datos de la tabla
@@ -103,13 +97,31 @@ public class ListaVehiculos extends javax.swing.JPanel {
                         tablaActualizada(e.getFirstRow(), e.getColumn(), model);
                     }
                 }
+
             });
 
             // Asignar el modelo al JTable
             tb_vehiculos.setModel(model);
 
+            tb_vehiculos.addMouseListener(new MouseAdapter() {
+
+                @Override
+                public void mouseClicked(MouseEvent e) {
+                    int row = tb_vehiculos.getSelectedRow();
+                    if (row != -1) {
+                        int column = tb_vehiculos.getSelectedColumn();
+                        if (column == 0) {
+                            patentePrev = tb_vehiculos.getValueAt(row, column).toString();
+                        } else {
+                            patentePrev = null;
+                        }
+                    }
+                }
+            });
+
+
         } catch (Exception e) {
-            e.printStackTrace();
+            throw new RuntimeException("Error al obtener lista de vehiculos: " + e.getMessage());
         }
     }
 
@@ -125,33 +137,37 @@ public class ListaVehiculos extends javax.swing.JPanel {
         DAOVehiculoImpl dao = new DAOVehiculoImpl();
 
         Vehiculo selectedVehiculo = new Vehiculo();
-        selectedVehiculo.setPatente(mapaPatentes.get(row).getPatente());
-        selectedVehiculo.setHoraEntrada(mapaPatentes.get(row).getHoraEntrada());
-        selectedVehiculo.setCalle(mapaPatentes.get(row).getCalle());
-        selectedVehiculo.setuLat(mapaPatentes.get(row).getuLat());
-        selectedVehiculo.setuLon(mapaPatentes.get(row).getuLon());
+        selectedVehiculo.setPatente(mapaPatentes.get(patentePrev).getPatente());
+        selectedVehiculo.setHoraEntrada(mapaPatentes.get(selectedVehiculo.getPatente()).getHoraEntrada());
+        selectedVehiculo.setCalle(mapaPatentes.get(selectedVehiculo.getPatente()).getCalle());
+        selectedVehiculo.setuLat(mapaPatentes.get(selectedVehiculo.getPatente()).getuLat());
+        selectedVehiculo.setuLon(mapaPatentes.get(selectedVehiculo.getPatente()).getuLon());
 
         switch (column) {
             case 0: //Modificacion patente
                 //Validacion de la patente modificada
-                if (!Utils.validarPatente(value.toString())) {
+                if (!Utils.validarPatente(value.toString().toUpperCase())) {
                     javax.swing.JOptionPane.showMessageDialog(this, "Patente Invalida, debe ser formato \"LLNNNLL\" \n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
                     model.setValueAt(selectedVehiculo.getPatente(), row, column);
                     break;
                 }
                 try {
-                    dao.modificar(selectedVehiculo, value.toString());
+                    dao.modificar(selectedVehiculo, value.toString().toUpperCase());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    javax.swing.JOptionPane.showMessageDialog(this, "Ocurrió un error al modificar la patente del vehiculo. \n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
+                    System.out.println(e.getMessage());
                 }
+                mapaPatentes.get(selectedVehiculo.getPatente()).setPatente(value.toString());
                 break;
             case 1: //Modificacion Calle
                 try {
                     selectedVehiculo.setCalle(value.toString());
                     dao.modificar(selectedVehiculo, selectedVehiculo.getPatente());
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    javax.swing.JOptionPane.showMessageDialog(this, "Ocurrió un error al modificar la calle del vehiculo. \n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
+                    System.out.println(e.getMessage());
                 }
+                mapaPatentes.get(selectedVehiculo.getPatente()).setCalle(value.toString());
                 break;
             case 2: //Modificacion Hora
                 try {
@@ -162,7 +178,7 @@ public class ListaVehiculos extends javax.swing.JPanel {
                     if (!Utils.validarHora(time)) {
                         javax.swing.JOptionPane.showMessageDialog(this, "Hora Invalida, debe ser formato \"HH:mm\" \n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("HH:mm");
-                        model.setValueAt(mapaPatentes.get(row).getHoraEntrada().toLocalDateTime().format(formatter), row, column);
+                        model.setValueAt(mapaPatentes.get(selectedVehiculo.getPatente()).getHoraEntrada().toLocalDateTime().format(formatter), row, column);
                         break;
                     }
 
@@ -174,8 +190,11 @@ public class ListaVehiculos extends javax.swing.JPanel {
 
                     selectedVehiculo.setHoraEntrada(ts);
                     dao.modificar(selectedVehiculo, selectedVehiculo.getPatente());
+
+                    mapaPatentes.get(selectedVehiculo.getPatente()).setHoraEntrada(ts);
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    javax.swing.JOptionPane.showMessageDialog(this, "Ocurrió un error al modificar la hora del vehiculo. \n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
+                    System.out.println(e.getMessage());
                 }
                 break;
             default:
@@ -242,27 +261,49 @@ public class ListaVehiculos extends javax.swing.JPanel {
     }// </editor-fold>//GEN-END:initComponents
 
     /**
-     * Funcionalidad del boton para eliminar un vehiculo al seleccionarlo en la tabla primero
+     * Funcionalidad del boton para eliminar vehiculos al seleccionarlos en la tabla primero
      *
      * @param evt evento de pulsar el boton
      */
     private void bt_eliminarActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bt_eliminarActionPerformed
-        int indSel = tb_vehiculos.getSelectedRow();
-        if (indSel != -1) {
+        int[] selectedRows = tb_vehiculos.getSelectedRows();
+
+        if (selectedRows.length > 0) {
             DAOVehiculoImpl dao = new DAOVehiculoImpl();
-            try {
-                dao.eliminar(mapaPatentes.get(indSel));
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+            Map<String, Integer> mapaFyP = mapaFilasyPatentes(selectedRows);
+
+            for (Map.Entry<String, Integer> selectedPatente : mapaFyP.entrySet()) {
+                try {
+                    dao.eliminar(mapaPatentes.get(selectedPatente.getKey()));
+                } catch (Exception e) {
+                    javax.swing.JOptionPane.showMessageDialog(this, "Ocurrió un error al eliminar los vehiculos. \n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
+                    System.out.println(e.getMessage());
+                }
+
+                DefaultTableModel model = (DefaultTableModel) tb_vehiculos.getModel();
+
+                mapaPatentes.remove(selectedPatente.getKey());
+                model.removeRow(selectedPatente.getValue());
             }
 
-            DefaultTableModel model = (DefaultTableModel) tb_vehiculos.getModel();
-            model.removeRow(indSel);
-            mapaPatentes.remove(indSel);
-
-            javax.swing.JOptionPane.showMessageDialog(this, "Vehiculo eliminado exitosamente.\n", "AVISO", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            javax.swing.JOptionPane.showMessageDialog(this, "Vehiculos eliminados exitosamente.\n", "AVISO", javax.swing.JOptionPane.INFORMATION_MESSAGE);
         }
     }//GEN-LAST:event_bt_eliminarActionPerformed
+
+    /**
+     * Convierte los indices seleccionados en un mapa de filas y patentes
+     *
+     * @param selectedRows filas seleccionadas
+     * @return mapa de patentes - filas seleccionadas
+     */
+    private Map<String, Integer> mapaFilasyPatentes(int[] selectedRows) {
+        Map<String, Integer> map = new HashMap<>();
+        //En orden decreciente para evitar errores
+        for (int i = selectedRows.length - 1; i >= 0; i--) {
+            map.put(tb_vehiculos.getValueAt(selectedRows[i], 0).toString(), selectedRows[i]);
+        }
+        return map;
+    }
 
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

@@ -8,7 +8,7 @@ import java.util.Properties;
 public class Constants {
     private static final Properties properties = new Properties();
 
-    //Bloque de inicializacion estatica de la clase (Distinto de un constructor)
+    //Bloque de inicializacion estatica de la clase para cargar las constantes desde el archivo (Distinto de un constructor)
     static {
         InputStream inputStream = null;
 

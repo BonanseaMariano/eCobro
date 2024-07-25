@@ -9,23 +9,28 @@ import java.time.LocalDateTime;
 public class Utils {
 
     /**
-     * Valida una patente ingresada con el formato "LLNNNLL" (Patentes Argentinas 2015)
+     * Valida una patente ingresada con el formato "LLNNNLL" o "LLLNNN" (Patentes Argentinas 1994 y 2015)
      *
      * @param patente patente a validar
-     * @return
+     * @return true si es correcta
      */
     public static boolean validarPatente(String patente) {
-        if (patente.length() != 7) {
+        if (patente.isEmpty()) {
             return false;
         }
 
         char[] caracteres = patente.toCharArray();
 
-        if (!Character.isLetter(caracteres[0]) || !Character.isLetter(caracteres[1]) || !Character.isDigit(caracteres[2]) || !Character.isDigit(caracteres[3]) ||
-                !Character.isDigit(caracteres[4]) || !Character.isLetter(caracteres[5]) || !Character.isLetter(caracteres[6])) {
-            return false;
-        }
-        return true;
+        return switch (caracteres.length) {
+            case 6 ->
+                    Character.isLetter(caracteres[0]) && Character.isLetter(caracteres[1]) && Character.isLetter(caracteres[2]) && Character.isDigit(caracteres[3]) &&
+                            Character.isDigit(caracteres[4]) && Character.isDigit(caracteres[5]);
+            case 7 ->
+                    Character.isLetter(caracteres[0]) && Character.isLetter(caracteres[1]) && Character.isDigit(caracteres[2]) && Character.isDigit(caracteres[3]) &&
+                            Character.isDigit(caracteres[4]) && Character.isLetter(caracteres[5]) && Character.isLetter(caracteres[6]);
+            default -> false;
+        };
+
     }
 
     /**
@@ -39,9 +44,7 @@ public class Utils {
         LocalDateTime entradaDateTime = entrada.toLocalDateTime();
         LocalDateTime salidaDateTime = salida.toLocalDateTime();
 
-        Duration diferencia = Duration.between(entradaDateTime, salidaDateTime);
-
-        return diferencia;
+        return Duration.between(entradaDateTime, salidaDateTime);
     }
 
     /**
@@ -54,19 +57,6 @@ public class Utils {
         long horas = d.toHours();
         long minutos = d.toMinutes() - (horas * 60);
         return String.format("%d:%02d", horas, minutos);
-    }
-
-    /**
-     * Crea un GeoPosition a partir de una latitud y longitud de GoogleMaps
-     *
-     * @param latitudLongitud coordenadas de latitud y longitud como aparecen en google maps (Ejemplo: -42.766575, -65.033028)
-     * @return GeoPosition
-     */
-    public static GeoPosition convertirCoordenadasGM(String latitudLongitud) {
-        String[] coordenadas = latitudLongitud.split(",");
-        double latitud = Double.parseDouble(coordenadas[0].trim());
-        double longitud = Double.parseDouble(coordenadas[1].trim());
-        return new GeoPosition(latitud, longitud);
     }
 
     /**
@@ -103,9 +93,6 @@ public class Utils {
             return false;
         }
         char[] caracteres = time.toCharArray();
-        if (!Character.isDigit(caracteres[0]) || !Character.isDigit(caracteres[1]) || caracteres[2] != ':' || !Character.isDigit(caracteres[3]) || !Character.isDigit(caracteres[4])) {
-            return false;
-        }
-        return true;
+        return Character.isDigit(caracteres[0]) && Character.isDigit(caracteres[1]) && caracteres[2] == ':' && Character.isDigit(caracteres[3]) && Character.isDigit(caracteres[4]);
     }
 }
