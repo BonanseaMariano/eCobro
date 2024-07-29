@@ -86,13 +86,13 @@ public class Utils {
      * Valida una hora ingresada con el formato HH:mm
      *
      * @param time hora a validar
-     * @return true si es correcta
+     * @return true si es incorrecta
      */
     public static boolean validarHora(String time) {
         if (time.length() != 5) {
-            return false;
+            return true;
         }
         char[] caracteres = time.toCharArray();
-        return Character.isDigit(caracteres[0]) && Character.isDigit(caracteres[1]) && caracteres[2] == ':' && Character.isDigit(caracteres[3]) && Character.isDigit(caracteres[4]);
+        return !Character.isDigit(caracteres[0]) || !Character.isDigit(caracteres[1]) || caracteres[2] != ':' || !Character.isDigit(caracteres[3]) || !Character.isDigit(caracteres[4]);
     }
 }

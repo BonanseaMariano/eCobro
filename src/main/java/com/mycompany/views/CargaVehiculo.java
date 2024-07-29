@@ -22,6 +22,7 @@ import javax.swing.event.MouseInputListener;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.SQLException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -294,12 +295,20 @@ public class CargaVehiculo extends javax.swing.JPanel {
             javax.swing.JOptionPane.showMessageDialog(this, "Patente Invalida, debe ser formato \"LLNNNLL\" o \"LLLNNN\" \n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
             tf_patente.requestFocus();
             return;
-        } else if (!Utils.validarHora(tf_hora.getText())) {
+        } else if (Utils.validarHora(tf_hora.getText())) {
             javax.swing.JOptionPane.showMessageDialog(this, "Hora Invalida, debe ser formato \"HH:MM\" \n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
             tf_hora.requestFocus();
             return;
         }
 
+        agregarVehiculo();
+
+    }//GEN-LAST:event_bt_cargarActionPerformed
+
+    /**
+     * Agrega un nuevo vehiculo
+     */
+    private void agregarVehiculo() {
         //Asignacion de valores
         String patente = tf_patente.getText().toUpperCase();
         Timestamp hora;
@@ -327,8 +336,9 @@ public class CargaVehiculo extends javax.swing.JPanel {
         vehiculo.setuLon(uLon);
         vehiculo.setCalle(calle);
 
+        DAOVehiculo dao = new DAOVehiculoImpl();
+
         try {
-            DAOVehiculo dao = new DAOVehiculoImpl();
             dao.registrar(vehiculo);
             javax.swing.JOptionPane.showMessageDialog(this, "Vehiculo registrado exitosamente.\n", "AVISO", javax.swing.JOptionPane.INFORMATION_MESSAGE);
 
@@ -338,13 +348,43 @@ public class CargaVehiculo extends javax.swing.JPanel {
             tf_lat.setText("");
             tf_long.setText("");
             tf_calle.setText("");
-        } catch (Exception e) {
-            javax.swing.JOptionPane.showMessageDialog(this, "Ocurrió un error al registrar el vehiculo. \n", "AVISO", javax.swing.JOptionPane.ERROR_MESSAGE);
-            System.out.println(e.getMessage());
+        } catch (SQLException ex) {
+            if (ex.getErrorCode() == 1062) {
+                // El código de error 1062 indica que ya existe un elemento con la misma id key en la base de datos
+                patenteExistente(dao, vehiculo);
+            } else {
+                javax.swing.JOptionPane.showMessageDialog(this, "Error al agregar el vehículo: " + ex.getMessage(), "ERROR", javax.swing.JOptionPane.ERROR_MESSAGE);
+            }
         }
+    }
 
-    }//GEN-LAST:event_bt_cargarActionPerformed
+    /**
+     * Actualiza o no los datos del vehiculo con la misma patente
+     *
+     * @param dao      dao de la base de datos
+     * @param vehiculo vehiculo a actualizar
+     */
+    private void patenteExistente(DAOVehiculo dao, Vehiculo vehiculo) {
+        int resultado = javax.swing.JOptionPane.showOptionDialog(
+                this,
+                "La patente " + vehiculo.getPatente() + " ya existe. ¿Desea actualizar los datos del vehículo?",
+                "AVISO",
+                javax.swing.JOptionPane.YES_NO_OPTION,
+                javax.swing.JOptionPane.QUESTION_MESSAGE,
+                null,
+                null,
+                null
+        );
 
+        if (resultado == javax.swing.JOptionPane.YES_OPTION) {
+            try {
+                dao.modificar(vehiculo, vehiculo.getPatente());
+                javax.swing.JOptionPane.showMessageDialog(this, "Datos del vehiculo " + vehiculo.getPatente() + " actualizados exitosamente.\n", "AVISO", javax.swing.JOptionPane.INFORMATION_MESSAGE);
+            } catch (SQLException e) {
+                javax.swing.JOptionPane.showMessageDialog(this, "Error al actualizar los datos del vehículo " + vehiculo.getPatente() + ": " + e.getMessage(), "ERROR", javax.swing.JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel bg_contenido;
