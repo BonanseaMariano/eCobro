@@ -66,7 +66,7 @@ public class Constants {
             PRECIO_POR_MEDIAHORA = Double.parseDouble(properties.getProperty("precio.porMediaHora", "2500.0"));
             DFAULT_ZOOM = Integer.parseInt(properties.getProperty("zoom.default", "3"));
             MIN_DIST_CLIC = Double.parseDouble(properties.getProperty("distancia.minima", "4.0"));
-            URL = properties.getProperty("db.url", "jdbc:mysql://localhost/ecobro");
+            URL = properties.getProperty("db.root", "jdbc:mysql://localhost");
             DB_URL = properties.getProperty("db.url", "jdbc:mysql://localhost/ecobro");
             USER = properties.getProperty("db.user", "root");
             PASS = properties.getProperty("db.passwrd", "");
