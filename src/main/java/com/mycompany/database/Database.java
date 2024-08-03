@@ -1,5 +1,7 @@
 package com.mycompany.database;
 
+import com.mycompany.utils.Constants;
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -7,10 +9,7 @@ import java.sql.Statement;
 
 public class Database {
     protected Connection conexion;
-    private final String URL = "jdbc:mysql://localhost";
-    private final String DB_URL = "jdbc:mysql://localhost/ecobro";
-    private final String USER = "root";
-    private final String PASS = "";
+
 
     /**
      * Conecta con la base de datos y si no existe la crea
@@ -18,7 +17,7 @@ public class Database {
     public void conectar() {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
-            conexion = DriverManager.getConnection(DB_URL, USER, PASS);
+            conexion = DriverManager.getConnection(Constants.DB_URL, Constants.USER, Constants.PASS);
         } catch (ClassNotFoundException | SQLException ex) {
             if (ex instanceof SQLException && ((SQLException) ex).getSQLState().equals("42000")) {
                 // La base de datos no existe
@@ -45,7 +44,7 @@ public class Database {
      * @throws SQLException Si la base de datos no pudo ser creada correctamente
      */
     private void crearBaseDeDatos() throws SQLException {
-        try (Connection connection = DriverManager.getConnection(URL, USER, PASS)) {
+        try (Connection connection = DriverManager.getConnection(Constants.URL, Constants.USER, Constants.PASS)) {
             Statement statement = connection.createStatement();
 
             statement.executeUpdate("CREATE DATABASE IF NOT EXISTS ecobro");
