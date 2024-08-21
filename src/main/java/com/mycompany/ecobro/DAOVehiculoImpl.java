@@ -8,6 +8,9 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -19,7 +22,7 @@ public class DAOVehiculoImpl extends Database implements DAOVehiculo {
             this.conectar();
             PreparedStatement st = this.conexion.prepareStatement("INSERT INTO vehiculo (patente, horaEntrada, calle, uLat, uLon) VALUES (?, ?, ?, ?, ?)");
             st.setString(1, vehiculo.getPatente());
-            st.setTimestamp(2, new Timestamp(vehiculo.getHoraEntrada().getTime()));
+            st.setString(2, new SimpleDateFormat("HH:mm").format(vehiculo.getHoraEntrada()));
             st.setString(3, vehiculo.getCalle());
             st.setDouble(4, vehiculo.getuLat());
             st.setDouble(5, vehiculo.getuLon());
@@ -36,7 +39,7 @@ public class DAOVehiculoImpl extends Database implements DAOVehiculo {
             this.conectar();
             PreparedStatement st = this.conexion.prepareStatement("UPDATE vehiculo SET patente = ?, horaEntrada = ?, calle = ?, uLat = ?, uLon = ? WHERE patente = ?");
             st.setString(1, patenteNueva);
-            st.setTimestamp(2, new Timestamp(vehiculo.getHoraEntrada().getTime()));
+            st.setString(2, new SimpleDateFormat("HH:mm").format(vehiculo.getHoraEntrada()));
             st.setString(3, vehiculo.getCalle());
             st.setDouble(4, vehiculo.getuLat());
             st.setDouble(5, vehiculo.getuLon());
@@ -72,7 +75,10 @@ public class DAOVehiculoImpl extends Database implements DAOVehiculo {
             while (rs.next()) {
                 Vehiculo vehiculo = new Vehiculo();
                 vehiculo.setPatente(rs.getString("patente"));
-                vehiculo.setHoraEntrada(rs.getTimestamp("horaEntrada"));
+                String horaEntradaStr = rs.getString("horaEntrada");
+                SimpleDateFormat sdf = new SimpleDateFormat("HH:mm");
+                Date horaEntradaDate = sdf.parse(horaEntradaStr);
+                vehiculo.setHoraEntrada(new Timestamp(horaEntradaDate.getTime()));
                 vehiculo.setuLat(rs.getDouble("uLat"));
                 vehiculo.setuLon(rs.getDouble("uLon"));
                 vehiculo.setCalle(rs.getString("calle"));
@@ -80,6 +86,8 @@ public class DAOVehiculoImpl extends Database implements DAOVehiculo {
             }
             rs.close();
             st.close();
+        } catch (ParseException e) {
+            throw new RuntimeException(e);
         } finally {
             this.cerrar();
         }

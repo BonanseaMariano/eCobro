@@ -6,5 +6,8 @@
       <option name="processLiterals" value="true" />
       <option name="processComments" value="true" />
     </inspection_tool>
+    <inspection_tool class="TodoComment" enabled="true" level="WARNING" enabled_by_default="true">
+      <option name="onlyWarnOnEmpty" value="false" />
+    </inspection_tool>
   </profile>
 </component>

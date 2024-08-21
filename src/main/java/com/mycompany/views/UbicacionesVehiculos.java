@@ -295,6 +295,7 @@ public class UbicacionesVehiculos extends javax.swing.JPanel {
             Timestamp horaSalida = new Timestamp(System.currentTimeMillis());
 
             // Calcular la diferencia de tiempo en minutos
+            //TODO revisar esto que el calculo es incorrecto
             long diffMinutes = (horaSalida.getTime() - horaEntrada.getTime()) / (60 * 1000);
 
             // Calcular el importe a abonar
